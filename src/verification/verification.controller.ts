@@ -8,6 +8,7 @@ import {
 } from '@nestjs/common';
 import { VerificationService } from './verification.service';
 import { UserService } from '../user/user.service';
+import { ResendEmailVerification } from './dto/resend.dto';
 
 @Controller('verification')
 export class VerificationController {
@@ -23,8 +24,12 @@ export class VerificationController {
   }
 
   @Post('resend')
-  async resendVerification(@Body('email') email: string) {
-    const user = await this.userService.findUserByEmail(email);
+  async resendVerification(
+    @Body() resendresendEmailVerification: ResendEmailVerification,
+  ) {
+    const user = await this.userService.findUserByEmail(
+      resendresendEmailVerification.email,
+    );
     if (!user) throw new BadRequestException('User not found');
     if (user.isEmailVerified) {
       throw new BadRequestException('Email already verified');
