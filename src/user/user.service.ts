@@ -2,13 +2,12 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
-import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    private readonly jwtService: JwtService,
   ) {}
   async createUser(userData: Partial<User>): Promise<User> {
     const user = this.userRepository.create(userData);
@@ -43,16 +42,5 @@ export class UserService {
       throw new Error('User not found');
     }
     await this.userRepository.delete(id);
-  }
-  async generateAuthToken(user: User): Promise<string> {
-    const payload = {
-      sub: user.id,
-      email: user.email,
-      isVerified: user.isEmailVerified,
-    };
-
-    const token = this.jwtService.signAsync(payload);
-
-    return token;
   }
 }

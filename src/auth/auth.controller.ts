@@ -43,7 +43,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     try {
-      this.authService.login(loginDto, res);
+      await this.authService.login(loginDto, res);
       return new ApiResponse('Login successful');
     } catch (error) {
       console.log('Login failed:', error);

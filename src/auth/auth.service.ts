@@ -6,14 +6,30 @@ import { VerificationService } from 'src/verification/verification.service';
 import { LoginDto } from './dto/login.dto';
 import { Response } from 'express';
 import { ApiResponse } from 'src/common/response/response.dto';
+import { User } from 'src/user/entities/user.entity';
+import { JwtService } from '@nestjs/jwt';
+
 @Injectable()
 export class AuthService {
   constructor(
     private readonly userService: UserService,
     private readonly verificationService: VerificationService,
+    private readonly jwtService: JwtService,
   ) {}
   // Define your authentication logic here
   // For example, methods for login, registration, etc.
+
+  async generateAuthToken(user: User): Promise<string> {
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      isVerified: user.isEmailVerified,
+    };
+
+    const token = this.jwtService.signAsync(payload);
+
+    return token;
+  }
 
   async register(userData: RegisterUserDto, res: Response) {
     // Registration logic
@@ -27,7 +43,7 @@ export class AuthService {
       password: hashedPassword,
     });
     await this.verificationService.sendVerificationEmail(user);
-    const token = await this.userService.generateAuthToken(user);
+    const token = await this.generateAuthToken(user);
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
@@ -57,7 +73,7 @@ export class AuthService {
       throw new ConflictException('Email not verified');
     }
 
-    const token = await this.userService.generateAuthToken(user);
+    const token = await this.generateAuthToken(user);
     res.cookie('authToken', token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
