@@ -4,6 +4,7 @@ import { RegisterUserDto } from './dto/register.dto';
 import { User } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { VerificationService } from 'src/verification/verification.service';
+import { LoginDto } from './dto/login.dto';
 
 @Injectable()
 export class AuthService {
@@ -29,7 +30,26 @@ export class AuthService {
     return user;
   }
 
-  login() {
+  async login(credentials: LoginDto): Promise<string> {
     // Login logic
+    const user = await this.userService.findUserByEmail(credentials.email);
+    if (!user) {
+      throw new ConflictException('Invalid email or password');
+    }
+    const isPasswordValid = await bcrypt.compare(
+      credentials.password,
+      user.password,
+    );
+    if (!isPasswordValid) {
+      throw new ConflictException('Invalid email or password');
+    }
+    const isVerified = user.isEmailVerified;
+    if (!isVerified) {
+      throw new ConflictException('Email not verified');
+    }
+ 
+    const token = await this.userService.generateAuthToken(user);
+
+    return token;
   }
 }

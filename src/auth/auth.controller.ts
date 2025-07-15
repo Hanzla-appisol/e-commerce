@@ -9,12 +9,11 @@ import { RegisterUserDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { ApiResponse } from 'src/common/response/response.dto';
 import { ApiBody } from '@nestjs/swagger';
+import { LoginDto } from './dto/login.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
-  // Define your authentication endpoints here
-  // For example, login, register, etc.
   @Post('register')
   @ApiBody({ type: RegisterUserDto })
   async register(@Body() registerUserDto: RegisterUserDto) {
@@ -29,6 +28,21 @@ export class AuthController {
       if (error instanceof ConflictException) throw error;
       // Handle other errors, e.g., database errors, etc.
       throw new InternalServerErrorException('Registration failed');
-    }     
+    }
+  }
+
+  @Post('login')
+  @ApiBody({ type: LoginDto })
+  async login(@Body() loginDto: LoginDto) {
+    try {
+      this.authService.login(loginDto);
+      return new ApiResponse('Login successful');
+    } catch (error) {
+      console.log('Login failed:', error);
+      if (error instanceof ConflictException) throw error;
+      
+      throw new InternalServerErrorException('Login failed');
+    }
+    
   }
 }
