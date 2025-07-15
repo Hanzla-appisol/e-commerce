@@ -48,6 +48,7 @@ export class UserService {
     const payload = {
       sub: user.id,
       email: user.email,
+      isVerified: user.isEmailVerified,
     };
 
     const token = this.jwtService.signAsync(payload);

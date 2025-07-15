@@ -1,11 +1,11 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, Res } from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { RegisterUserDto } from './dto/register.dto';
-import { User } from 'src/user/entities/user.entity';
 import * as bcrypt from 'bcrypt';
 import { VerificationService } from 'src/verification/verification.service';
 import { LoginDto } from './dto/login.dto';
-
+import { Response } from 'express';
+import { ApiResponse } from 'src/common/response/response.dto';
 @Injectable()
 export class AuthService {
   constructor(
@@ -15,7 +15,7 @@ export class AuthService {
   // Define your authentication logic here
   // For example, methods for login, registration, etc.
 
-  async register(userData: RegisterUserDto): Promise<User> {
+  async register(userData: RegisterUserDto, res: Response) {
     // Registration logic
     const existingUser = await this.userService.findUserByEmail(userData.email);
     if (existingUser) {
@@ -27,10 +27,19 @@ export class AuthService {
       password: hashedPassword,
     });
     await this.verificationService.sendVerificationEmail(user);
-    return user;
+    const token = await this.userService.generateAuthToken(user);
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return new ApiResponse(
+      'User registered successfully, please check your email to verify your account.',
+    );
   }
 
-  async login(credentials: LoginDto): Promise<string> {
+  async login(credentials: LoginDto, res: Response) {
     // Login logic
     const user = await this.userService.findUserByEmail(credentials.email);
     if (!user) {
@@ -47,9 +56,14 @@ export class AuthService {
     if (!isVerified) {
       throw new ConflictException('Email not verified');
     }
- 
-    const token = await this.userService.generateAuthToken(user);
 
-    return token;
+    const token = await this.userService.generateAuthToken(user);
+    res.cookie('authToken', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 24 * 60 * 60 * 1000,
+    });
+    return new ApiResponse('Login successful');
   }
 }
