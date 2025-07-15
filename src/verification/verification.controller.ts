@@ -8,7 +8,8 @@ import {
 } from '@nestjs/common';
 import { VerificationService } from './verification.service';
 import { UserService } from '../user/user.service';
-import { ResendEmailVerification } from './dto/resend.dto';
+import { ResendEmailVerificationDTO } from './dto/resend.dto';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('verification')
 export class VerificationController {
@@ -24,8 +25,9 @@ export class VerificationController {
   }
 
   @Post('resend')
+  @ApiBody({ type: ResendEmailVerificationDTO })
   async resendVerification(
-    @Body() resendresendEmailVerification: ResendEmailVerification,
+    @Body() resendresendEmailVerification: ResendEmailVerificationDTO,
   ) {
     const user = await this.userService.findUserByEmail(
       resendresendEmailVerification.email,

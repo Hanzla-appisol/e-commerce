@@ -8,6 +8,7 @@ import {
 import { RegisterUserDto } from './dto/register.dto';
 import { AuthService } from './auth.service';
 import { ApiResponse } from 'src/common/response/response.dto';
+import { ApiBody } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -15,6 +16,7 @@ export class AuthController {
   // Define your authentication endpoints here
   // For example, login, register, etc.
   @Post('register')
+  @ApiBody({ type: RegisterUserDto })
   async register(@Body() registerUserDto: RegisterUserDto) {
     // Registration logic
     try {
@@ -27,6 +29,6 @@ export class AuthController {
       if (error instanceof ConflictException) throw error;
       // Handle other errors, e.g., database errors, etc.
       throw new InternalServerErrorException('Registration failed');
-    }
+    }     
   }
 }
