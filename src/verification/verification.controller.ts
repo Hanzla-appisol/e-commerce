@@ -10,6 +10,7 @@ import { VerificationService } from './verification.service';
 import { UserService } from '../user/user.service';
 import { ResendEmailVerificationDTO } from './dto/resend.dto';
 import { ApiBody } from '@nestjs/swagger';
+import { ForgotPasswordDto, ResetPasswordDto } from './dto/forgot-password.dto';
 
 @Controller('verification')
 export class VerificationController {
@@ -39,5 +40,17 @@ export class VerificationController {
 
     await this.verificationService.sendVerificationEmail(user);
     return { success: true, message: 'Verification email resent' };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    return this.verificationService.sendPasswordResetEmail(
+      forgotPasswordDto,
+    );
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    return this.verificationService.resetPassword(resetPasswordDto);
   }
 }
