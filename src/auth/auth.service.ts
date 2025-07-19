@@ -34,8 +34,20 @@ export class AuthService {
   async register(userData: RegisterUserDto, res: Response) {
     // Registration logic
     const existingUser = await this.userService.findUserByEmail(userData.email);
-    if (existingUser) {
+    console.log('existingUser:', existingUser);
+    if (existingUser && existingUser.isEmailVerified) {
       throw new ConflictException('User already exists');
+    }
+
+    if (existingUser && !existingUser.isEmailVerified) {
+      console.log('im running');
+      existingUser.password = await bcrypt.hash(userData.password, 10);
+      await this.userService.saveUser(existingUser);
+      // If user exists but email is not verified, resend verification email
+      await this.verificationService.sendVerificationEmail(existingUser);
+      throw new ConflictException(
+        'User already exists, please check your email to verify your account.',
+      );
     }
     const hashedPassword = await bcrypt.hash(userData.password, 10);
     const user = await this.userService.createUser({

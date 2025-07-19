@@ -1,8 +1,9 @@
 import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
 import { IsEnum } from 'class-validator';
 export enum UserRole {
-  USER = 'user',
+  CUSTOMER = 'customer',
   ADMIN = 'admin',
+  VENDOR = 'vendor',
 }
 @Entity()
 export class User {
@@ -24,7 +25,7 @@ export class User {
   @Column({
     type: 'enum',
     enum: UserRole,
-    default: UserRole.USER,
+    default: UserRole.CUSTOMER, // Default role is CUSTOMER
   })
   @IsEnum(UserRole)
   role: UserRole;

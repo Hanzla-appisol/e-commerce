@@ -1,11 +1,14 @@
 import {
   IsEmail,
+  IsEnum,
   IsNotEmpty,
+  IsOptional,
   IsString,
   Matches,
   MinLength,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { UserRole } from 'src/user/entities/user.entity';
 
 export class RegisterUserDto {
   @ApiProperty({
@@ -41,4 +44,14 @@ export class RegisterUserDto {
     },
   )
   password: string;
+
+  @ApiProperty({
+    example: 'customer or vendor',
+    description: 'The role of the user, either "user" or "vendor"',
+  })
+  @IsOptional()
+  @IsEnum([UserRole.CUSTOMER, UserRole.VENDOR], {
+    message: 'Role must be either customer or vendor',
+  })
+  role?: UserRole;
 }

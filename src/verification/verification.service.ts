@@ -24,7 +24,7 @@ export class VerificationService {
       { expiresIn: '5m' },
     );
 
-    const verificationLink = `${process.env.CLIENT_URL}/verification/verify-email?token=${token}`;
+    const verificationLink = `${process.env.CLIENT_URL}/api/verification/verify-email?token=${token}`;
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
