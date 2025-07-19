@@ -1,4 +1,10 @@
-import { ConflictException, Injectable, Res } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+  Res,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from 'src/user/user.service';
 import { RegisterUserDto } from './dto/register.dto';
 import * as bcrypt from 'bcrypt';
@@ -34,7 +40,7 @@ export class AuthService {
   async register(userData: RegisterUserDto, res: Response) {
     // Registration logic
     const existingUser = await this.userService.findUserByEmail(userData.email);
-    console.log('existingUser:', existingUser);
+    // console.log('existingUser:', existingUser);
     if (existingUser && existingUser.isEmailVerified) {
       throw new ConflictException('User already exists');
     }
@@ -71,18 +77,25 @@ export class AuthService {
     // Login logic
     const user = await this.userService.findUserByEmail(credentials.email);
     if (!user) {
-      throw new ConflictException('Invalid email or password');
+      throw new NotFoundException(
+        'User with this email does not exist.Please register first',
+      );
     }
     const isPasswordValid = await bcrypt.compare(
       credentials.password,
       user.password,
     );
     if (!isPasswordValid) {
-      throw new ConflictException('Invalid email or password');
+      throw new UnauthorizedException(
+        'Invalid password please provide correct password',
+      );
     }
     const isVerified = user.isEmailVerified;
     if (!isVerified) {
-      throw new ConflictException('Email not verified');
+      await this.verificationService.sendVerificationEmail(user);
+      throw new ConflictException(
+        'Email not verified,please check your email to verify your account.',
+      );
     }
 
     const token = await this.generateAuthToken(user);

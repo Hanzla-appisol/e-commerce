@@ -3,8 +3,10 @@ import {
   ConflictException,
   Controller,
   InternalServerErrorException,
+  NotFoundException,
   Post,
   Res,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { Response } from 'express';
 import { RegisterUserDto } from './dto/register.dto';
@@ -47,8 +49,14 @@ export class AuthController {
       return new ApiResponse('Login successful');
     } catch (error) {
       console.log('Login failed:', error);
-      if (error instanceof ConflictException) throw error;
-
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof UnauthorizedException
+      ) {
+        throw error;
+      }
+      // Handle other errors, e.g., database errors, etc.
       throw new InternalServerErrorException('Login failed');
     }
   }
