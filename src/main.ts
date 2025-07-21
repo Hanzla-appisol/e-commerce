@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
-
+import * as cookieParser from 'cookie-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
@@ -13,6 +13,7 @@ async function bootstrap() {
       forbidNonWhitelisted: true, // optional: throws if extra props
     }),
   );
+  app.use(cookieParser()); // for parsing cookies
   const config = new DocumentBuilder()
     .setTitle('E-Commerce API')
     .setDescription('NestJS E-Commerce Project')
